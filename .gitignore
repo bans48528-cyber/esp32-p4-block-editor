@@ -1,0 +1,26 @@
+host-build/
+build/
+managed_components/
+sdkconfig
+sdkconfig.old
+*.ppm
+device-backup/
+
+# Generated previews, images and local project data
+/preview*/
+/*.png
+/*.log
+/test-projects-*.bin
+**/board-projects.bin
+__pycache__/
+*.pyc
+# Keep only the current verified firmware and release evidence
+/firmware/*
+!/firmware/graphical_board_minimal.bin
+!/firmware/bootloader.bin
+!/firmware/partition-table.bin
+!/firmware/sdkconfig.verified
+!/firmware/flash.ps1
+!/firmware/current-release-build-flash.log
+!/firmware/device-current-release-boot.log
+!/firmware/current-release.md

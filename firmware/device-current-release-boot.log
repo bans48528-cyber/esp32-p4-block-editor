@@ -1,0 +1,95 @@
+I (142) esp_image: segment 4: paddr=000e2eb0 vaddr=4ff0f1d8 sizeESP-ROM:esp32p4-eco2-20240710
+Build:Jul 10 2024
+rst:0x17 (CHIP_USB_UART_RESET),boot:0xc (SPI_FAST_FLASH_BOOT)
+Core0 Saved PC:0x4ff04fe4
+Core1 Saved PC:0x4ff04fe4
+SPI mode:DIO, clock div:1
+load:0x4ff33ce0,len:0x15f4
+load:0x4ff2abd0,len:0xcf4
+load:0x4ff2cbd0,len:0x3324
+entry 0x4ff2abda
+I (8) boot: ESP-IDF v5.4.2 2nd stage bootloader
+I (8) boot: compile time Sep 10 2026 12:32:03
+I (8) boot: Multicore bootloader
+I (10) boot: chip revision: v1.3
+I (10) boot: efuse block revision: v0.3
+I (10) boot.esp32p4: SPI Speed      : 80MHz
+I (10) boot.esp32p4: SPI Mode       : DIO
+I (11) boot.esp32p4: SPI Flash Size : 16MB
+I (11) boot: Enabling RNG early entropy source...
+I (11) boot: Partition Table:
+I (12) boot: ## Label            Usage          Type ST Offset   Length
+I (12) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (13) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (13) boot:  2 factory          factory app      00 00 00010000 00400000
+I (14) boot: End of partition table
+I (15) esp_image: segment 0: paddr=00010020 vaddr=40090020 size=40da8h (265640) map
+I (53) esp_image: segment 1: paddr=00050dd0 vaddr=30100000 size=00068h (   104) load
+I (54) esp_image: segment 2: paddr=00050e40 vaddr=4ff00000 size=0f1d8h ( 61912) load
+I (66) esp_image: segment 3: paddr=00060020 vaddr=40000020 size=82e88h (536200) map
+I (142) esp_image: segment 4: paddr=000e2eb0 vaddr=4ff0f1d8 size=03408h ( 13320) load
+I (145) esp_image: segment 5: paddr=000e62c0 vaddr=4ff12600 size=02c14h ( 11284) load
+I (148) esp_image: segment 6: paddr=000e8edc vaddr=50108080 size=0001ch (    28) load
+I (153) boot: Loaded app from partition at offset 0x10000
+I (154) boot: Disabling RNG early entropy source...
+I (156) hex_psram: vendor id    : 0x0d (AP)
+I (156) hex_psram: Latency      : 0x01 (Fixed)
+I (156) hex_psram: DriveStr.    : 0x00 (25 Ohm)
+I (157) hex_psram: dev id       : 0x03 (generation 4)
+I (157) hex_psram: density      : 0x07 (256 Mbit)
+I (157) hex_psram: good-die     : 0x06 (Pass)
+I (158) hex_psram: SRF          : 0x02 (Slow Refresh)
+I (158) hex_psram: BurstType    : 0x00 ( Wrap)
+I (158) hex_psram: BurstLen     : 0x03 (2048 Byte)
+I (159) hex_psram: BitMode      : 0x01 (X16 Mode)
+I (159) hex_psram: Readlatency  : 0x04 (14 cycles@Fixed)
+I (160) hex_psram: DriveStrength: 0x00 (1/1)
+I (160) MSPI DQS: tuning success, best phase id is 0
+I (328) MSPI DQS: tuning success, best delayline id is 16
+I (328) esp_psram: Found 32MB PSRAM device
+I (329) esp_psram: Speed: 200MHz
+I (330) hex_psram: psram CS IO is dedicated
+I (330) cpu_start: Multicore app
+I (1238) esp_psram: SPI SRAM memory test OK
+I (1248) cpu_start: Pro cpu start user code
+I (1248) cpu_start: cpu freq: 360000000 Hz
+I (1248) app_init: Application information:
+I (1248) app_init: Project name:     graphical_board_minimal
+I (1248) app_init: App version:      1
+I (1249) app_init: Compile time:     Sep 10 2026 15:30:25
+I (1249) app_init: ELF file SHA256:  f7d188168...
+I (1249) app_init: ESP-IDF:          v5.4.2
+I (1249) efuse_init: Min chip rev:     v0.1
+I (1249) efuse_init: Max chip rev:     v1.99 
+I (1250) efuse_init: Chip rev:         v1.3
+I (1250) heap_init: Initializing. RAM available for dynamic allocation:
+I (1250) heap_init: At 4FF1EFA0 len 0001C020 (112 KiB): RAM
+I (1250) heap_init: At 4FF3AFC0 len 00004BF0 (18 KiB): RAM
+I (1250) heap_init: At 4FF40000 len 00060000 (384 KiB): RAM
+I (1251) heap_init: At 5010809C len 00007F64 (31 KiB): RTCRAM
+I (1251) heap_init: At 30100068 len 00001F98 (7 KiB): TCM
+I (1251) esp_psram: Adding pool of 32768K of PSRAM memory to heap allocator
+I (1252) spi_flash: detected chip: generic
+I (1252) spi_flash: flash io: dio
+I (1253) main_task: Started on CPU0
+I (1254) esp_psram: Reserving pool of 32K of internal memory for DMA/internal allocations
+I (1255) main_task: Calling app_main()
+I (1255) LVGL: Starting LVGL task
+W (1256) ledc: GPIO 23 is not usable, maybe conflict with others
+I (1256) ESP32_P4_EV: MIPI DSI PHY Powered on
+I (1257) ESP32_P4_EV: Install MIPI DSI LCD control panel
+I (1257) ESP32_P4_EV: Install EK79007 LCD control panel
+I (1257) st7701: version: 1.1.3
+I (1257) gpio: GPIO[5]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (1397) st7701_mipi: LCD ID: FF FF FF
+I (1397) st7701_mipi:  st7701->madctl_val: 0x0, st7701->colmod_val: 0x55
+I (1538) ESP32_P4_EV: Display initialized
+I (1542) LVGL: Setting PPA context for SW rotation
+W (1558) i2c.master: Please check pull-up resistances whether be connected properly. Otherwise unexpected behavior would happen. For more detailed information, please read docs
+I (1559) GT911: I2C address initialization procedure skipped - using default GT9xx setup
+I (1560) GT911: TouchPad_ID:0x39,0x31,0x31
+I (1560) GT911: TouchPad_Config_Version:250
+I (1592) prototype: render period=16 ms; PPA rotation=1
+I (1592) ESP32_P4_EV: Setting LCD backlight: 100%
+I (1592) prototype: full editor home started; 800x480 fixed rotation=270
+I (1604) main_task: Returned from app_main()

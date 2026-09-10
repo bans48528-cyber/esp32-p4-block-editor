@@ -1,0 +1,18 @@
+{
+  "motor-forward": "M20 23h24v24H20z M26 23v-5h12v5 M44 31h7v8h-7 M14 19A22 22 0 0 1 49 13 M42 11l8 2-2 8",
+  "motor-reverse": "M20 23h24v24H20z M26 23v-5h12v5 M44 31h7v8h-7 M50 19A22 22 0 0 0 15 13 M22 11l-8 2 2 8",
+  "motor-stop": "M18 19h28v28H18z M25 19v-5h14v5 M46 28h7v10h-7 M28 28h8v10h-8z",
+  "combo-forward": "M22 48V18 M13 27l9-9 9 9 M44 48V18 M35 27l9-9 9 9",
+  "combo-backward": "M22 16v30 M13 37l9 9 9-9 M44 16v30 M35 37l9 9 9-9",
+  "combo-turn-left": "M46 49V31q0-12-12-12H15 M25 9L15 19l10 10",
+  "combo-turn-right": "M18 49V31q0-12 12-12h19 M39 9l10 10-10 10",
+  "combo-stop": "M17 17h30v30H17z M26 25v14 M38 25v14",
+  "grayscale-sensor": "M14 17h36v30H14z M26 17v30 M38 17v30 M38 24h12 M38 33h12 M38 41h12",
+  "button-sensor": "M17 38h30v12H17z M24 38V27h16v11 M32 10v10 M18 16l5 5 M46 16l-5 5",
+  "host-button": "M12 17h40v32H12z M21 29v9 M17 33h8 M40 29v9 M36 33h8",
+  "play-note": "M26 43V17l23-5v25 M26 22l23-5 M26 43c0 9-16 10-16 2s16-10 16-2 M49 37c0 9-16 10-16 2s16-10 16-2",
+  "loop": "M18 22h20a15 15 0 0 1 0 30 M26 12L16 22l10 10",
+  "loop-count": "M18 22h20a15 15 0 0 1 0 30 M26 12L16 22l10 10",
+  "wait-time": "M21 10h22M21 54h22M24 12v8c0 5 4 9 8 12 4-3 8-7 8-12v-8M24 52v-8c0-5 4-9 8-12 4 3 8 7 8 12v8M27 26h10M27 42h10",
+  "ultrasonic-sensor": "M16 20v24M24 15v34M36 22c4 2 6 6 6 10s-2 8-6 10M45 15c6 4 10 10 10 17s-4 13-10 17"
+}

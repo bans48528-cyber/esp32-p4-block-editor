@@ -1,0 +1,250 @@
+Activating ESP-IDF 5.4
+Setting IDF_PATH to 'C:\esp\esp-idf-v5.4.2'.
+* Checking python version ... 3.13.5
+* Checking python dependencies ... OK
+* Deactivating the current ESP-IDF environment (if any) ... OK
+* Establishing a new ESP-IDF environment ... OK
+* Identifying shell ... pwsh.exe
+* Detecting outdated tools in system ... OK - no outdated tools found
+
+Done! You can now compile ESP-IDF projects.
+Go to the project directory and run:
+
+  idf.py build
+
+Executing action: all (aliases: build)
+Running ninja in directory C:\esp\board-editor\build
+Executing "ninja all"...
+[1/9] Performing build step for 'bootloader'
+
+[1/1] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\esp\board-editor\build\bootloader\esp-idf\esptool_py && C:\Users\64264\.espressif\python_env\idf5.4_py3.13_env\Scripts\python.exe C:/esp/esp-idf-v5.4.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x2000 C:/esp/board-editor/build/bootloader/bootloader.bin"
+
+
+Bootloader binary size 0x5660 bytes. 0x9a0 bytes (10%) free.
+
+
+
+[2/9] No install step for 'bootloader'
+
+[3/9] Completed 'bootloader'
+
+[4/9] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/editor.c.obj
+
+In file included from C:/esp/board-editor/main/editor.c:1459:
+C:/esp/board-editor/main/home.inc: In function 'create_project':
+C:/esp/board-editor/main/home.inc:59:5: warning: missing initializer for field 'option' of 'Node' [-Wmissing-field-initializers]
+   59 |     p->nodes[0] = (Node){MOTOR, -1, 0, 10, 0};
+      |     ^
+In file included from C:/esp/board-editor/main/editor.c:3:
+C:/esp/board-editor/main/projects.h:30:45: note: 'option' declared here
+   30 |   int32_t type, parent, order, value, port, option;
+      |                                             ^~~~~~
+C:/esp/board-editor/main/home.inc:60:5: warning: missing initializer for field 'option' of 'Node' [-Wmissing-field-initializers]
+   60 |     p->nodes[1] = (Node){WAIT, -1, 1, 10, 0};
+      |     ^
+C:/esp/board-editor/main/projects.h:30:45: note: 'option' declared here
+   30 |   int32_t type, parent, order, value, port, option;
+      |                                             ^~~~~~
+C:/esp/board-editor/main/home.inc:64:5: warning: missing initializer for field 'option' of 'Node' [-Wmissing-field-initializers]
+   64 |     p->nodes[0] = (Node){LOOP, -1, 0, 3, 0};
+      |     ^
+C:/esp/board-editor/main/projects.h:30:45: note: 'option' declared here
+   30 |   int32_t type, parent, order, value, port, option;
+      |                                             ^~~~~~
+C:/esp/board-editor/main/home.inc:65:5: warning: missing initializer for field 'option' of 'Node' [-Wmissing-field-initializers]
+   65 |     p->nodes[1] = (Node){MOTOR, 0, 0, 10, 0};
+      |     ^
+
+C:/esp/board-editor/main/projects.h:30:45: note: 'option' declared here
+
+   30 |   int32_t type, parent, order, value, port, option;
+
+      |                                             ^~~~~~
+
+[5/9] Linking C static library esp-idf\main\libmain.a
+
+[6/9] Generating ld/sections.ld
+
+[7/9] Linking CXX executable graphical_board_minimal.elf
+
+[8/9] Generating binary image from built executable
+
+esptool.py v4.12.0
+
+
+Creating esp32p4 image...
+
+
+Merged 3 ELF sections
+
+
+Successfully created esp32p4 image.
+
+
+Generated C:/esp/board-editor/build/graphical_board_minimal.bin
+
+[9/9] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\esp\board-editor\build\esp-idf\esptool_py && C:\Users\64264\.espressif\python_env\idf5.4_py3.13_env\Scripts\python.exe C:/esp/esp-idf-v5.4.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/esp/board-editor/build/partition_table/partition-table.bin C:/esp/board-editor/build/graphical_board_minimal.bin"
+
+graphical_board_minimal.bin binary size 0xd8f20 bytes. Smallest app partition is 0x400000 bytes. 0x3270e0 bytes (79%) free.
+
+
+
+
+Project build complete. To flash, run:
+ idf.py flash
+or
+ idf.py -p PORT flash
+or
+ python -m esptool --chip esp32p4 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 16MB --flash_freq 80m 0x2000 build\bootloader\bootloader.bin 0x8000 build\partition_table\partition-table.bin 0x10000 build\graphical_board_minimal.bin
+or from the "C:\esp\board-editor\build" directory
+ python -m esptool --chip esp32p4 -b 460800 --before default_reset --after hard_reset write_flash "@flash_args"
+Executing action: flash
+Running ninja in directory C:\esp\board-editor\build
+Executing "ninja flash"...
+[1/5] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\esp\board-editor\build\esp-idf\esptool_py && C:\Users\64264\.espressif\python_env\idf5.4_py3.13_env\Scripts\python.exe C:/esp/esp-idf-v5.4.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/esp/board-editor/build/partition_table/partition-table.bin C:/esp/board-editor/build/graphical_board_minimal.bin"
+
+graphical_board_minimal.bin binary size 0xd8f20 bytes. Smallest app partition is 0x400000 bytes. 0x3270e0 bytes (79%) free.
+
+
+[2/5] Performing build step for 'bootloader'
+
+[1/1] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\esp\board-editor\build\bootloader\esp-idf\esptool_py && C:\Users\64264\.espressif\python_env\idf5.4_py3.13_env\Scripts\python.exe C:/esp/esp-idf-v5.4.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x2000 C:/esp/board-editor/build/bootloader/bootloader.bin"
+
+
+Bootloader binary size 0x5660 bytes. 0x9a0 bytes (10%) free.
+
+
+
+[3/5] No install step for 'bootloader'
+
+[4/5] Completed 'bootloader'
+
+[4/5] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\esp\esp-idf-v5.4.2\components\esptool_py && C:\Users\64264\.espressif\tools\cmake\3.30.2\bin\cmake.exe -D IDF_PATH=C:/esp/esp-idf-v5.4.2 -D SERIAL_TOOL=C:/Users/64264/.espressif/python_env/idf5.4_py3.13_env/Scripts/python.exe;;C:/esp/esp-idf-v5.4.2/components/esptool_py/esptool/esptool.py;--chip;esp32p4 -D SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args -D WORKING_DIRECTORY=C:/esp/board-editor/build -P C:/esp/esp-idf-v5.4.2/components/esptool_py/run_serial_tool.cmake"
+
+esptool.py --chip esp32p4 -p COM10 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 16MB 0x2000 bootloader/bootloader.bin 0x10000 graphical_board_minimal.bin 0x8000 partition_table/partition-table.bin
+
+esptool.py v4.12.0
+
+Serial port COM10
+
+Connecting...
+
+Chip is ESP32-P4 (revision v1.3)
+
+Features: High-Performance MCU
+
+Crystal is 40MHz
+
+USB mode: USB-Serial/JTAG
+
+MAC: 30:ed:a0:e3:3b:9d
+
+Uploading stub...
+
+Running stub...
+
+Stub running...
+
+Changing baud rate to 460800
+
+Changed.
+
+Configuring flash size...
+
+Flash will be erased from 0x00002000 to 0x00007fff...
+
+Flash will be erased from 0x00010000 to 0x000e8fff...
+
+Flash will be erased from 0x00008000 to 0x00008fff...
+
+SHA digest in image updated
+
+Compressed 22112 bytes to 13590...
+
+Writing at 0x00002000... (100 %)
+
+Wrote 22112 bytes (13590 compressed) at 0x00002000 in 0.5 seconds (effective 371.6 kbit/s)...
+
+Hash of data verified.
+
+Compressed 888608 bytes to 476257...
+
+Writing at 0x00010000... (3 %)
+
+Writing at 0x0001c324... (6 %)
+
+Writing at 0x0003eb37... (10 %)
+
+Writing at 0x0004629b... (13 %)
+
+Writing at 0x0004da6d... (16 %)
+
+Writing at 0x00054c6c... (20 %)
+
+Writing at 0x0005ad76... (23 %)
+
+Writing at 0x000610ce... (26 %)
+
+Writing at 0x0006744b... (30 %)
+
+Writing at 0x0006d567... (33 %)
+
+Writing at 0x000733eb... (36 %)
+
+Writing at 0x00079550... (40 %)
+
+Writing at 0x0007f0ff... (43 %)
+
+Writing at 0x0008449f... (46 %)
+
+Writing at 0x000895f3... (50 %)
+
+Writing at 0x0008f00a... (53 %)
+
+Writing at 0x00095e15... (56 %)
+
+Writing at 0x0009b1a3... (60 %)
+
+Writing at 0x000a0902... (63 %)
+
+Writing at 0x000a620e... (66 %)
+
+Writing at 0x000ac0bd... (70 %)
+
+Writing at 0x000b228e... (73 %)
+
+Writing at 0x000b891f... (76 %)
+
+Writing at 0x000bf1b2... (80 %)
+
+Writing at 0x000c5609... (83 %)
+
+Writing at 0x000cc13a... (86 %)
+
+Writing at 0x000d1996... (90 %)
+
+Writing at 0x000d9c00... (93 %)
+
+Writing at 0x000e0e60... (96 %)
+
+Writing at 0x000e84d8... (100 %)
+
+Wrote 888608 bytes (476257 compressed) at 0x00010000 in 7.6 seconds (effective 930.1 kbit/s)...
+
+Hash of data verified.
+
+Compressed 3072 bytes to 105...
+
+Writing at 0x00008000... (100 %)
+
+Wrote 3072 bytes (105 compressed) at 0x00008000 in 0.1 seconds (effective 236.4 kbit/s)...
+
+Hash of data verified.
+
+
+
+Leaving...
+
+Hard resetting via RTS pin...
+
+Done

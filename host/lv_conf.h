@@ -1,0 +1,11 @@
+#pragma once
+#define LV_COLOR_DEPTH 32
+#define LV_USE_OS LV_OS_NONE
+#define LV_MEM_SIZE (4 * 1024 * 1024)
+#define LV_FONT_SIMSUN_16_CJK 1
+#define LV_USE_LOG 1
+#define LV_LOG_LEVEL LV_LOG_LEVEL_WARN
+#define LV_USE_SYSMON 0
+#define LV_USE_PERF_MONITOR 0
+#define LV_USE_DRAW_SW 1
+#define LV_USE_DRAW_SW_ASM LV_DRAW_SW_ASM_NONE

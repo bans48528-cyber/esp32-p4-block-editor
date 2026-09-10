@@ -1,0 +1,1 @@
+idf_component_register(SRCS "main.c" "editor.c" "projects.c" "model.c" "block_shape.c" "block_icons.c" "toolbar_icons.c" "board_font.c" INCLUDE_DIRS "." REQUIRES espressif__esp32_p4_function_ev_board lvgl nvs_flash)
