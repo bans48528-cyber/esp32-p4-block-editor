@@ -1,0 +1,15 @@
+# esp_lvgl_port 2.6.0 registers this callback for the non-avoid-tearing
+# DSI path. Keep it and the LVGL flush completion function available while
+# flash writes disable the cache. The SDK maps the DSI/DW-GDMA ISR itself.
+[mapping:board_display_port_iram]
+archive: liblvgl_port_lib.a
+entries:
+    if LCD_DSI_ISR_IRAM_SAFE = y:
+        esp_lvgl_port_disp: lvgl_port_flush_dpi_panel_ready_callback (noflash)
+
+[mapping:board_display_lvgl_iram]
+archive: liblvgl__lvgl.a
+entries:
+    if LCD_DSI_ISR_IRAM_SAFE = y:
+        lv_display: lv_display_flush_ready (noflash)
+# Re-evaluate this mapping with the auxiliary port archive registered.

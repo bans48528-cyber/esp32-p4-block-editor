@@ -1,95 +1,198 @@
-I (142) esp_image: segment 4: paddr=000e2eb0 vaddr=4ff0f1d8 sizeESP-ROM:esp32p4-eco2-20240710
+I (131) esp_image: segment 1: paddr=000b43c8 vaddr=30100000 sizeESP-ROM:esp32p4-eco2-20240710
 Build:Jul 10 2024
-rst:0x17 (CHIP_USB_UART_RESET),boot:0xc (SPI_FAST_FLASH_BOOT)
-Core0 Saved PC:0x4ff04fe4
-Core1 Saved PC:0x4ff04fe4
+rst:0x17 (CHIP_USB_UART_RESET),boot:0x30c (SPI_FAST_FLASH_BOOT)
+Core0 Saved PC:0x4ff05356
+Core1 Saved PC:0x4ff05356
 SPI mode:DIO, clock div:1
 load:0x4ff33ce0,len:0x15f4
 load:0x4ff2abd0,len:0xcf4
 load:0x4ff2cbd0,len:0x3324
 entry 0x4ff2abda
 I (8) boot: ESP-IDF v5.4.2 2nd stage bootloader
-I (8) boot: compile time Sep 10 2026 12:32:03
-I (8) boot: Multicore bootloader
+I (8) boot: compile time Sep 10 2026 19:51:52
+I (9) boot: Multicore bootloader
 I (10) boot: chip revision: v1.3
 I (10) boot: efuse block revision: v0.3
 I (10) boot.esp32p4: SPI Speed      : 80MHz
-I (10) boot.esp32p4: SPI Mode       : DIO
+I (11) boot.esp32p4: SPI Mode       : DIO
 I (11) boot.esp32p4: SPI Flash Size : 16MB
 I (11) boot: Enabling RNG early entropy source...
-I (11) boot: Partition Table:
+I (12) boot: Partition Table:
 I (12) boot: ## Label            Usage          Type ST Offset   Length
 I (12) boot:  0 nvs              WiFi data        01 02 00009000 00006000
 I (13) boot:  1 phy_init         RF data          01 01 0000f000 00001000
-I (13) boot:  2 factory          factory app      00 00 00010000 00400000
-I (14) boot: End of partition table
-I (15) esp_image: segment 0: paddr=00010020 vaddr=40090020 size=40da8h (265640) map
-I (53) esp_image: segment 1: paddr=00050dd0 vaddr=30100000 size=00068h (   104) load
-I (54) esp_image: segment 2: paddr=00050e40 vaddr=4ff00000 size=0f1d8h ( 61912) load
-I (66) esp_image: segment 3: paddr=00060020 vaddr=40000020 size=82e88h (536200) map
-I (142) esp_image: segment 4: paddr=000e2eb0 vaddr=4ff0f1d8 size=03408h ( 13320) load
-I (145) esp_image: segment 5: paddr=000e62c0 vaddr=4ff12600 size=02c14h ( 11284) load
-I (148) esp_image: segment 6: paddr=000e8edc vaddr=50108080 size=0001ch (    28) load
-I (153) boot: Loaded app from partition at offset 0x10000
-I (154) boot: Disabling RNG early entropy source...
-I (156) hex_psram: vendor id    : 0x0d (AP)
-I (156) hex_psram: Latency      : 0x01 (Fixed)
-I (156) hex_psram: DriveStr.    : 0x00 (25 Ohm)
-I (157) hex_psram: dev id       : 0x03 (generation 4)
-I (157) hex_psram: density      : 0x07 (256 Mbit)
-I (157) hex_psram: good-die     : 0x06 (Pass)
-I (158) hex_psram: SRF          : 0x02 (Slow Refresh)
-I (158) hex_psram: BurstType    : 0x00 ( Wrap)
-I (158) hex_psram: BurstLen     : 0x03 (2048 Byte)
-I (159) hex_psram: BitMode      : 0x01 (X16 Mode)
-I (159) hex_psram: Readlatency  : 0x04 (14 cycles@Fixed)
-I (160) hex_psram: DriveStrength: 0x00 (1/1)
-I (160) MSPI DQS: tuning success, best phase id is 0
-I (328) MSPI DQS: tuning success, best delayline id is 16
-I (328) esp_psram: Found 32MB PSRAM device
-I (329) esp_psram: Speed: 200MHz
-I (330) hex_psram: psram CS IO is dedicated
-I (330) cpu_start: Multicore app
-I (1238) esp_psram: SPI SRAM memory test OK
-I (1248) cpu_start: Pro cpu start user code
-I (1248) cpu_start: cpu freq: 360000000 Hz
-I (1248) app_init: Application information:
-I (1248) app_init: Project name:     graphical_board_minimal
-I (1248) app_init: App version:      1
-I (1249) app_init: Compile time:     Sep 10 2026 15:30:25
-I (1249) app_init: ELF file SHA256:  f7d188168...
-I (1249) app_init: ESP-IDF:          v5.4.2
-I (1249) efuse_init: Min chip rev:     v0.1
-I (1249) efuse_init: Max chip rev:     v1.99 
-I (1250) efuse_init: Chip rev:         v1.3
-I (1250) heap_init: Initializing. RAM available for dynamic allocation:
-I (1250) heap_init: At 4FF1EFA0 len 0001C020 (112 KiB): RAM
-I (1250) heap_init: At 4FF3AFC0 len 00004BF0 (18 KiB): RAM
-I (1250) heap_init: At 4FF40000 len 00060000 (384 KiB): RAM
-I (1251) heap_init: At 5010809C len 00007F64 (31 KiB): RTCRAM
-I (1251) heap_init: At 30100068 len 00001F98 (7 KiB): TCM
-I (1251) esp_psram: Adding pool of 32768K of PSRAM memory to heap allocator
-I (1252) spi_flash: detected chip: generic
-I (1252) spi_flash: flash io: dio
-I (1253) main_task: Started on CPU0
-I (1254) esp_psram: Reserving pool of 32K of internal memory for DMA/internal allocations
-I (1255) main_task: Calling app_main()
-I (1255) LVGL: Starting LVGL task
-W (1256) ledc: GPIO 23 is not usable, maybe conflict with others
-I (1256) ESP32_P4_EV: MIPI DSI PHY Powered on
-I (1257) ESP32_P4_EV: Install MIPI DSI LCD control panel
-I (1257) ESP32_P4_EV: Install EK79007 LCD control panel
-I (1257) st7701: version: 1.1.3
-I (1257) gpio: GPIO[5]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (1397) st7701_mipi: LCD ID: FF FF FF
-I (1397) st7701_mipi:  st7701->madctl_val: 0x0, st7701->colmod_val: 0x55
-I (1538) ESP32_P4_EV: Display initialized
-I (1542) LVGL: Setting PPA context for SW rotation
-W (1558) i2c.master: Please check pull-up resistances whether be connected properly. Otherwise unexpected behavior would happen. For more detailed information, please read docs
-I (1559) GT911: I2C address initialization procedure skipped - using default GT9xx setup
-I (1560) GT911: TouchPad_ID:0x39,0x31,0x31
-I (1560) GT911: TouchPad_Config_Version:250
-I (1592) prototype: render period=16 ms; PPA rotation=1
-I (1592) ESP32_P4_EV: Setting LCD backlight: 100%
-I (1592) prototype: full editor home started; 800x480 fixed rotation=270
-I (1604) main_task: Returned from app_main()
+I (14) boot:  2 factory          factory app      00 00 00010000 00400000
+I (14) boot:  3 thumbnails       Unknown data     01 40 00410000 000c0000
+I (15) boot:  4 projects         WiFi data        01 02 004d0000 00020000
+I (15) boot:  5 works            Unknown data     01 82 004f0000 00b10000
+I (17) boot: End of partition table
+I (17) esp_image: segment 0: paddr=00010020 vaddr=40100020 size=a43a0h (672672) map
+I (112) esp_image: segment 1: paddr=000b43c8 vaddr=30100000 size=00068h (   104) load
+I (113) esp_image: segment 2: paddr=000b4438 vaddr=4ff00000 size=0bbe0h ( 48096) load
+I (122) esp_image: segment 3: paddr=000c0020 vaddr=40000020 size=f2b70h (994160) map
+I (262) esp_image: segment 4: paddr=001b2b98 vaddr=4ff0bbe0 size=0723ch ( 29244) load
+I (268) esp_image: segment 5: paddr=001b9ddc vaddr=4ff12e80 size=03038h ( 12344) load
+I (271) esp_image: segment 6: paddr=001bce1c vaddr=50108080 size=0001ch (    28) load
+I (276) boot: Loaded app from partition at offset 0x10000
+I (277) boot: Disabling RNG early entropy source...
+I (280) hex_psram: vendor id    : 0x0d (AP)
+I (280) hex_psram: Latency      : 0x01 (Fixed)
+I (280) hex_psram: DriveStr.    : 0x00 (25 Ohm)
+I (280) hex_psram: dev id       : 0x03 (generation 4)
+I (281) hex_psram: density      : 0x07 (256 Mbit)
+I (281) hex_psram: good-die     : 0x06 (Pass)
+I (281) hex_psram: SRF          : 0x02 (Slow Refresh)
+I (282) hex_psram: BurstType    : 0x00 ( Wrap)
+I (282) hex_psram: BurstLen     : 0x03 (2048 Byte)
+I (283) hex_psram: BitMode      : 0x01 (X16 Mode)
+I (283) hex_psram: Readlatency  : 0x04 (14 cycles@Fixed)
+I (283) hex_psram: DriveStrength: 0x00 (1/1)
+I (284) MSPI DQS: tuning success, best phase id is 0
+I (452) MSPI DQS: tuning success, best delayline id is 16
+I (452) esp_psram: Found 32MB PSRAM device
+I (453) esp_psram: Speed: 200MHz
+I (454) hex_psram: psram CS IO is dedicated
+I (454) cpu_start: Multicore app
+I (1360) esp_psram: SPI SRAM memory test OK
+I (1370) cpu_start: Pro cpu start user code
+I (1370) cpu_start: cpu freq: 360000000 Hz
+I (1370) app_init: Application information:
+I (1371) app_init: Project name:     graphical_board_minimal
+I (1371) app_init: App version:      1
+I (1371) app_init: Compile time:     Sep 10 2026 21:42:58
+I (1371) app_init: ELF file SHA256:  48149cee3...
+I (1371) app_init: ESP-IDF:          v5.4.2
+I (1372) efuse_init: Min chip rev:     v0.1
+I (1372) efuse_init: Max chip rev:     v1.99 
+I (1372) efuse_init: Chip rev:         v1.3
+I (1372) heap_init: Initializing. RAM available for dynamic allocation:
+I (1373) heap_init: At 4FF256A0 len 00015920 (86 KiB): RAM
+I (1373) heap_init: At 4FF3AFC0 len 00004BF0 (18 KiB): RAM
+I (1373) heap_init: At 4FF59240 len 00046DC0 (283 KiB): RAM
+I (1373) heap_init: At 5010809C len 00007F64 (31 KiB): RTCRAM
+I (1373) heap_init: At 30100068 len 00001F98 (7 KiB): TCM
+I (1374) esp_psram: Adding pool of 32768K of PSRAM memory to heap allocator
+I (1375) spi_flash: detected chip: generic
+I (1375) spi_flash: flash io: dio
+I (1375) host_init: ESP Hosted : Host chip_ip[18]
+I (1376) H_API: ESP-Hosted starting. Hosted_Tasks: prio:23, stack: 5120 RPC_task_stack: 5120
+I (1376) H_API: ** add_esp_wifi_remote_channels **
+I (1377) gpio: GPIO[18]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 
+I (1377) gpio: GPIO[19]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 
+I (1377) gpio: GPIO[14]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 
+I (1378) gpio: GPIO[15]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 
+I (1378) gpio: GPIO[16]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 
+I (1378) gpio: GPIO[17]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (1379) H_SDIO_DRV: sdio_data_to_rx_buf_task started
+I (1379) main_task: Started on CPU0
+I (1380) esp_psram: Reserving pool of 32K of internal memory for DMA/internal allocations
+I (1381) main_task: Calling app_main()
+I (1381) prototype: DSI scanout read QoS=15; PPA hardware rotation retained
+I (1381) LVGL: Starting LVGL task
+W (1382) ledc: GPIO 23 is not usable, maybe conflict with others
+I (1382) ESP32_P4_EV: MIPI DSI PHY Powered on
+I (1383) ESP32_P4_EV: Install MIPI DSI LCD control panel
+I (1383) ESP32_P4_EV: Install EK79007 LCD control panel
+I (1383) st7701: version: 1.1.3
+I (1383) gpio: GPIO[5]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (1523) st7701_mipi: LCD ID: FF FF FF
+I (1523) st7701_mipi:  st7701->madctl_val: 0x0, st7701->colmod_val: 0x55
+I (1664) ESP32_P4_EV: Display initialized
+I (1668) LVGL: Setting PPA context for SW rotation
+W (1684) i2c.master: Please check pull-up resistances whether be connected properly. Otherwise unexpected behavior would happen. For more detailed information, please read docs
+I (1685) GT911: I2C address initialization procedure skipped - using default GT9xx setup
+I (1686) GT911: TouchPad_ID:0x39,0x31,0x31
+I (1686) GT911: TouchPad_Config_Version:250
+I (1687) scroll_perf: probe enabled; work=refresh minus flush/wait; PPA/LCD included in flush; times are wall clock, not CPU utilization
+I (1728) prototype: render period=16 ms; PPA rotation=1
+I (1729) ESP32_P4_EV: Setting LCD backlight: 100%
+I (1729) prototype: full editor home started; 800x480 fixed rotation=270
+I (1735) ble_scan: state=1 error=0
+I (1736) H_API: ESP-Hosted Try to communicate with ESP-Hosted slave
+
+I (1736) transport: Attempt connection with slave: retry[0]
+W (1736) H_SDIO_DRV: Reset slave using GPIO[54]
+I (1736) os_wrapper_esp: GPIO [54] configured
+I (1736) gpio: GPIO[54]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (1740) main_task: Returned from app_main()
+I (2703) scroll_perf: nodes=0 frames=4 scroll=0 cached=0 window=1016ms avg=14.20ms max=52.06ms work=7.18ms flush=6.97ms ppa=6.53ms lcd=0.28ms wait=0.05ms batches=4.2 pixels=99990
+I (3257) sdio_wrapper: SDIO master: Slot 1, Data-Lines: 4-bit Freq(KHz)[20000 KHz]
+I (3257) sdio_wrapper: GPIOs: CLK[18] CMD[19] D0[14] D1[15] D2[16] D3[17] Slave_Reset[54]
+I (3257) sdio_wrapper: Queues: Tx[20] Rx[20] SDIO-Rx-Mode[1]
+I (3290) gpio: GPIO[15]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 
+I (3292) gpio: GPIO[17]| InputEn: 0| OutputEn: 0| OpenDrain: 0| Pullup: 1| Pulldown: 0| Intr:0 
+I (3293) sdio_wrapper: Function 0 Blocksize: 512
+I (3293) sdio_wrapper: Function 1 Blocksize: 512
+I (3393) H_SDIO_DRV: Card init success, TRANSPORT_RX_ACTIVE
+I (3393) transport: set_transport_state: 1
+I (3393) transport: Waiting for esp_hosted slave to be ready
+I (3479) H_SDIO_DRV: SDIO Host operating in STREAMING MODE
+I (3479) H_SDIO_DRV: Open data path at slave
+I (3479) H_SDIO_DRV: Starting SDIO process rx task
+I (3507) H_SDIO_DRV: Received ESP_PRIV_IF type message
+I (3507) transport: Received INIT event from ESP32 peripheral
+I (3507) transport: EVENT: 12
+I (3507) transport: Identified slave [esp32c6]
+W (3507) H_SDIO_DRV: SDIO clock freq set to [20000]KHz, Max possible (on PCB) is 40000KHz
+I (3507) transport: EVENT: 11
+I (3507) transport: capabilities: 0xd
+I (3507) transport: Features supported are:
+I (3508) transport: 	 * WLAN
+I (3508) transport: 	   - HCI over SDIO
+I (3508) transport: 	   - BLE only
+I (3508) transport: EVENT: 13
+W (3508) transport: Version mismatch: Host [2.12.0] > Co-proc [2.3.0] ==> Upgrade co-proc to avoid RPC timeouts
+I (3508) transport: ESP board type is : 13 
+
+I (3508) transport: Base transport is set-up, TRANSPORT_TX_ACTIVE
+I (3508) H_API: Transport active
+I (3509) transport: Slave chip Id[12]
+I (3509) transport: raw_tp_dir[-], flow_ctrl: low[60] high[80]
+I (3509) transport: transport_delayed_init
+I (3509) esp_cli: Registering command: crash
+I (3509) esp_cli: Registering command: reboot
+I (3509) esp_cli: Registering command: mem-dump
+I (3509) esp_cli: Registering command: task-dump
+I (3509) esp_cli: Registering command: cpu-dump
+I (3509) esp_cli: Registering command: heap-trace
+I (3510) esp_cli: Registering command: sock-dump
+I (3510) esp_cli: Registering command: host-power-save
+I (3510) vhci_drv: Host BT Support: Enabled
+I (3510) vhci_drv: 	BT Transport Type: VHCI
+I (3510) H_SDIO_DRV: Received INIT event
+I (3510) H_SDIO_DRV: Event type: 0x22
+I (3510) H_SDIO_DRV: Write thread started
+I (3723) scroll_perf: nodes=0 frames=3 scroll=0 cached=0 window=1020ms avg=1.29ms max=1.43ms work=0.83ms flush=0.46ms ppa=0.38ms lcd=0.06ms wait=0.00ms batches=1.0 pixels=5124
+I (4382) ble_scan: C6 firmware 2.3.2
+I (4382) ble_scan: Using legacy boot-enabled BLE controller
+I (4383) transport: Attempt connection with slave: retry[0]
+I (4383) transport: Transport is already up
+I (4392) NimBLE: GAP procedure initiated: stop advertising.
+
+I (4394) NimBLE: Failed to restore IRKs from store; status=8
+
+I (4484) NimBLE: GAP procedure initiated: discovery; 
+I (4484) NimBLE: own_addr_type=0 filter_policy=0 passive=0 limited=0 filter_duplicates=0 
+I (4484) NimBLE: duration=10000ms
+I (4484) NimBLE: 
+
+I (4743) scroll_perf: nodes=0 frames=4 scroll=0 cached=0 window=1020ms avg=2.33ms max=5.09ms work=1.60ms flush=0.73ms ppa=0.59ms lcd=0.12ms wait=0.00ms batches=1.0 pixels=5124
+I (5763) scroll_perf: nodes=0 frames=3 scroll=0 cached=0 window=1020ms avg=1.25ms max=1.38ms work=0.80ms flush=0.45ms ppa=0.37ms lcd=0.06ms wait=0.00ms batches=1.0 pixels=5124
+I (6784) scroll_perf: nodes=0 frames=4 scroll=0 cached=0 window=1021ms avg=1.20ms max=1.30ms work=0.78ms flush=0.42ms ppa=0.35ms lcd=0.06ms wait=0.00ms batches=1.0 pixels=5124
+I (7803) scroll_perf: nodes=0 frames=3 scroll=0 cached=0 window=1019ms avg=1.23ms max=1.30ms work=0.80ms flush=0.43ms ppa=0.36ms lcd=0.06ms wait=0.00ms batches=1.0 pixels=5124
+I (8822) scroll_perf: nodes=0 frames=3 scroll=0 cached=0 window=1019ms avg=1.20ms max=1.27ms work=0.78ms flush=0.42ms ppa=0.34ms lcd=0.06ms wait=0.00ms batches=1.0 pixels=5124
+I (9822) scroll_perf: nodes=0 frames=4 scroll=0 cached=0 window=1000ms avg=1.21ms max=1.29ms work=0.79ms flush=0.42ms ppa=0.34ms lcd=0.07ms wait=0.00ms batches=1.0 pixels=5124
+I (10843) scroll_perf: nodes=0 frames=3 scroll=0 cached=0 window=1021ms avg=1.23ms max=1.29ms work=0.80ms flush=0.43ms ppa=0.35ms lcd=0.06ms wait=0.00ms batches=1.0 pixels=5124
+I (11843) scroll_perf: nodes=0 frames=3 scroll=0 cached=0 window=1000ms avg=1.21ms max=1.30ms work=0.79ms flush=0.42ms ppa=0.34ms lcd=0.06ms wait=0.00ms batches=1.0 pixels=5124
+I (12843) scroll_perf: nodes=0 frames=4 scroll=0 cached=0 window=1000ms avg=1.21ms max=1.31ms work=0.79ms flush=0.42ms ppa=0.34ms lcd=0.06ms wait=0.00ms batches=1.0 pixels=5124
+I (13862) scroll_perf: nodes=0 frames=3 scroll=0 cached=0 window=1019ms avg=1.22ms max=1.28ms work=0.79ms flush=0.42ms ppa=0.35ms lcd=0.06ms wait=0.00ms batches=1.0 pixels=5124
+I (14487) ble_scan: state=3 error=0
+I (14487) ble_scan: found name=Bowie M2s Pro rssi=-92 Spark_AI=0
+I (14487) ble_scan: found name=midea rssi=-92 Spark_AI=0
+I (14487) ble_scan: found name=NGMUPlLQc8DGpL6HYcS0isSJs rssi=-79 Spark_AI=0
+I (14488) ble_scan: found name=NGOI62TYihq7swhVqwRA+2xZI rssi=-89 Spark_AI=0
+I (14488) ble_scan: found name=NGMUPlLQc8DGpL6HYcS0isSJs rssi=-84 Spark_AI=0
+I (14863) scroll_perf: nodes=0 frames=3 scroll=0 cached=0 window=1001ms avg=1.27ms max=1.32ms work=0.84ms flush=0.43ms ppa=0.35ms lcd=0.07ms wait=0.00ms batches=1.0 pixels=5124
+I (15883) scroll_perf: nodes=0 frames=4 scroll=0 cached=0 window=1020ms avg=1.17ms max=1.24ms work=0.76ms flush=0.41ms ppa=0.34ms lcd=0.05ms wait=0.00ms batches=1.0 pixels=5124
+I (16883) scroll_perf: nodes=0 frames=3 scroll=0 cached=0 window=1000ms avg=1.16ms max=1.20ms work=0.75ms flush=0.41ms ppa=0.34ms lcd=0.05ms wait=0.00ms batches=1.0 pixels=5124
+I (17884) scroll_perf: nodes=0 frames=4 scroll=0 cached=0 window=1001ms avg=1.15ms max=1.18ms work=0.75ms flush=0.40ms ppa=0.34ms lcd=0.05ms wait=0.00ms batches=1.0 pixels=5124

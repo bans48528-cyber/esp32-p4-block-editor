@@ -1,0 +1,9 @@
+menu "Board editor diagnostics"
+    config BOARD_SCROLL_BENCHMARK
+        bool "Run a temporary, unsaved scroll benchmark after boot"
+        default n
+    config BOARD_SCROLL_LEGACY
+        bool "Use previous whole-scene cache for A/B benchmark"
+        depends on BOARD_SCROLL_BENCHMARK
+        default n
+endmenu

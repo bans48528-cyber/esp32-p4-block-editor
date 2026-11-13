@@ -1,0 +1,13 @@
+file(GLOB PIKA_SOURCES core/*.c api/*.c lib/*.c)
+if(ESP_PLATFORM)
+  idf_component_register(SRCS ${PIKA_SOURCES} compile.c INCLUDE_DIRS . core api lib)
+  target_compile_options(${COMPONENT_LIB} PRIVATE -Wno-error=maybe-uninitialized -Wno-error=format)
+else()
+  add_library(pika_compiler STATIC ${PIKA_SOURCES} compile.c)
+  target_include_directories(pika_compiler PUBLIC . PRIVATE core api lib)
+  target_compile_definitions(pika_compiler PRIVATE _CRT_SECURE_NO_WARNINGS)
+  if(MSVC)
+    target_compile_options(pika_compiler PRIVATE /utf-8 /w)
+  endif()
+endif()
+

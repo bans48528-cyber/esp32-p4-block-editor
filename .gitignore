@@ -24,3 +24,8 @@ __pycache__/
 !/firmware/current-release-build-flash.log
 !/firmware/device-current-release-boot.log
 !/firmware/current-release.md
+
+*.thumb-*.bin
+*.thumb-*.bin.tmp
+**/board-projects.bin.works/
+/test-projects-*.bin.works/

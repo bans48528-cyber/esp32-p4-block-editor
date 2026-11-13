@@ -1,0 +1,157 @@
+{
+  "source": "编程板图标.ai",
+  "source_sha256": "7d24195659d2b1eda70fd0f6820684ba85a93ebcd9d10166e05fea846b5dc474",
+  "size": 52,
+  "artboards": [
+    {
+      "page": 1,
+      "name": "motor-forward",
+      "label": "电机正转指定时间",
+      "background": "#0090f5"
+    },
+    {
+      "page": 2,
+      "name": "motor-reverse",
+      "label": "电机反转指定时间",
+      "background": "#0090f5"
+    },
+    {
+      "page": 3,
+      "name": "motor-forward-continuous",
+      "label": "电机持续正转",
+      "background": "#0090f5"
+    },
+    {
+      "page": 4,
+      "name": "motor-reverse-continuous",
+      "label": "电机持续反转",
+      "background": "#0090f5"
+    },
+    {
+      "page": 5,
+      "name": "motor-stop",
+      "label": "电机停止",
+      "background": "#0090f5"
+    },
+    {
+      "page": 6,
+      "name": "motor-power",
+      "label": "电机功率",
+      "background": "#0090f5"
+    },
+    {
+      "page": 7,
+      "name": "combo-forward",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 8,
+      "name": "combo-backward",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 9,
+      "name": "combo-turn-right",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 10,
+      "name": "combo-turn-left",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 11,
+      "name": "combo-forward-continuous",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 12,
+      "name": "combo-backward-continuous",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 13,
+      "name": "wait-time",
+      "label": "",
+      "background": "#ffb515"
+    },
+    {
+      "page": 14,
+      "name": "loop",
+      "label": "",
+      "background": "#ffb515"
+    },
+    {
+      "page": 15,
+      "name": "combo-turn-right-continuous",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 16,
+      "name": "combo-turn-left-continuous",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 17,
+      "name": "combo-stop",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 18,
+      "name": "combo-power",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 19,
+      "name": "ultrasonic-sensor",
+      "label": "",
+      "background": "#34cbf0"
+    },
+    {
+      "page": 20,
+      "name": "button-sensor",
+      "label": "",
+      "background": "#34cbf0"
+    },
+    {
+      "page": 21,
+      "name": "grayscale-sensor",
+      "label": "",
+      "background": "#34cbf0"
+    },
+    {
+      "page": 22,
+      "name": "host-button",
+      "label": "",
+      "background": "#34cbf0"
+    },
+    {
+      "page": 23,
+      "name": "start",
+      "label": "",
+      "background": "#f5c402"
+    },
+    {
+      "page": 24,
+      "name": "combo-direction",
+      "label": "",
+      "background": "#ff4ccd"
+    },
+    {
+      "page": 25,
+      "name": "play-note",
+      "label": "",
+      "background": "#c061f1"
+    }
+  ]
+}

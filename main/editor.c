@@ -1,18 +1,34 @@
 #include "editor.h"
+#include "ble_scan.h"
 #include "block_shape.h"
+#include "device_status.h"
+#include "perf_probe.h"
 #include "projects.h"
+#include "thumbnails.h"
 #include "toolbar_icons.h"
+#include "transfer.h"
+#include "work_store.h"
+#ifdef ESP_PLATFORM
+#include "esp_heap_caps.h"
+#endif
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 LV_FONT_DECLARE(board_font);
+LV_FONT_DECLARE(board_param_font);
 static Node nodes[LIMIT], history[25][LIMIT];
 static int history_pos, history_end;
 static Library library;
+static WorkCatalog work_catalog;
+static uint32_t work_ids[PROJECTS];
+static size_t home_page;
 static bool storage_ready;
 static int active_project = -1, menu_project;
 static lv_obj_t *name_input;
+static void open_bluetooth(lv_event_t *e);
+static void scroll_cache_invalidate(void), scroll_cache_dispose(void);
+static void home_thumbnail_dispose(void);
 static void home(void), open_editor(void), back_home(lv_event_t *),
     save_work(lv_event_t *);
 static lv_obj_t *canvas, *content, *status, *ghost, *modal, *palette, *tabs,
@@ -22,11 +38,18 @@ static lv_obj_t *cards[LIMIT], *cavities[LIMIT], *undo_btn, *redo_btn,
 static bool selected_nodes[LIMIT], multi;
 static int category, source, kind, drag_group = -1, drop_parent, drop_pos;
 static bool dragging, stage_hot;
+static bool drag_entered_canvas;
+static int drag_edge;
+static uint32_t drag_edge_since;
+static bool benchmark_panning;
 static uint32_t hover_since;
 static int staging_return = -1, staged_scroll;
 static bool staged_panning;
 static lv_point_t pressed;
 static void render(void), render_palette(void), parameters(int);
+static bool update_thumbnail(int slot);
+static bool show_thumbnail(lv_obj_t *card, int slot);
+static void home_thumb_cache_clear(void);
 static void say(const char *text) {
   if (status && strcmp(lv_label_get_text(status), text) != 0)
     lv_label_set_text(status, text);
@@ -142,13 +165,26 @@ static void stage_selection(lv_event_t *e) {
 static const char *option_text(int t, int o) {
   static const char *compare[] = {"<", ">", "="}, *states[] = {"按下", "松开"},
                     *keys[] = {"左键", "右键"},
-                    *notes[] = {"1", "2", "3", "4", "5"};
+                    *notes[] = {"1", "2", "3", "4", "5", "6", "7"};
   if (t == ULTRASONIC || t == GRAYSCALE)
     return compare[o];
   if (t == BUTTON_SENSOR)
     return states[o];
   if (t == HOST_BUTTON)
     return keys[o];
+  if (t == MOTOR_POWER || t == COMBO_POWER) {
+    static const char *power[] = {"25%", "50%", "75%", "100%"};
+    return power[o];
+  }
+  if (t == COMBO_DIRECTION) {
+    static const char *modes[] = {"全部正向", "左电机反向", "右电机反向",
+                                  "全部反向"};
+    return modes[o];
+  }
+  if (t == COMBO_CONTINUOUS) {
+    static const char *directions[] = {"前进", "后退", "左转", "右转"};
+    return directions[o];
+  }
   return notes[o];
 }
 static void number_text(char *out, size_t size, Node n) {
@@ -160,15 +196,27 @@ static void number_text(char *out, size_t size, Node n) {
 static void param_text(char *out, size_t size, Node n) {
   char num[16];
   number_text(num, sizeof num, n);
-  if (blocks[n.type].port) {
-    if (blocks[n.type].max)
-      snprintf(out, size, "%c %ss", 'A' + (int)n.port, num);
+  if (n.type == ULTRASONIC || n.type == GRAYSCALE)
+    snprintf(out, size, "%c%s%d%s", 'A' + (int)n.port,
+             option_text(n.type, n.option), (int)n.value,
+             n.type == ULTRASONIC ? "cm" : "");
+  else if (n.type == BUTTON_SENSOR)
+    snprintf(out, size, "%c%s", 'A' + (int)n.port,
+             option_text(n.type, n.option));
+  else if (n.type == NOTE) {
+    static const char *beats[] = {"0.25", "0.5", "1", "2"};
+    snprintf(out, size, "%s·%s拍", option_text(n.type, n.option),
+             beats[n.value]);
+  } else if (blocks[n.type].port) {
+    if (n.type == MOTOR_CONTINUOUS || n.type == REVERSE_CONTINUOUS)
+      snprintf(out, size, "%c%s∞", 'E' + (int)n.port,
+               n.type == MOTOR_CONTINUOUS ? "正转" : "反转");
+    else if (blocks[n.type].max)
+      snprintf(out, size, "%c %ss", 'E' + (int)n.port, num);
     else
-      snprintf(out, size, "端口 %c", 'A' + (int)n.port);
-  } else if (n.type == ULTRASONIC)
-    snprintf(out, size, "%s %dcm", option_text(n.type, n.option), (int)n.value);
-  else if (n.type == GRAYSCALE)
-    snprintf(out, size, "%s %d", option_text(n.type, n.option), (int)n.value);
+      snprintf(out, size, "端口 %c", 'E' + (int)n.port);
+  } else if (n.type == COMBO_CONTINUOUS)
+    snprintf(out, size, "%s∞", option_text(n.type, n.option));
   else if (blocks[n.type].choices)
     snprintf(out, size, "%s", option_text(n.type, n.option));
   else if (n.type == FOREVER)
@@ -182,18 +230,30 @@ static void param_text(char *out, size_t size, Node n) {
   else
     snprintf(out, size, "停止");
 }
-/* Native icon primitives keep the board independent of SVG/browser runtimes. */
-extern const lv_image_dsc_t *block_icons[];
+/* Assets are exported from the supplied Illustrator artboards. */
+extern const lv_image_dsc_t *const block_icons[TYPES + 1];
+extern const lv_image_dsc_t *const combo_continuous_icons[4];
+enum { BLOCK_ICON_SIZE = 52, BLOCK_ICON_INSET = (BLOCK_ICON_SIZE - 40) / 2 };
 static void icon(lv_obj_t *p, Node n, int x, int y) {
+  x -= BLOCK_ICON_INSET;
+  y -= BLOCK_ICON_INSET;
   if (n.type == MATRIX) {
-    lv_obj_t *o = decoration(p, x, y, 40, 40, 0x571cc1);
+    lv_obj_t *o = decoration(p, x, y, BLOCK_ICON_SIZE, BLOCK_ICON_SIZE, 0x571cc1);
     for (int i = 0; i < 25; i++)
-      decoration(o, (i % 5) * 8 + 1, (i / 5) * 8 + 1, 6, 6,
+      decoration(o, ((i % 5) * 8 + 1) * BLOCK_ICON_SIZE / 40,
+                 ((i / 5) * 8 + 1) * BLOCK_ICON_SIZE / 40, 8, 8,
                  (n.matrix & (1u << i)) ? 0xffffff : 0x7134cf);
     return;
   }
+  if (n.type < 0 || n.type > TYPES)
+    return;
+  const lv_image_dsc_t *image = n.type == COMBO_CONTINUOUS
+      ? combo_continuous_icons[n.option >= 0 && n.option < 4 ? n.option : 0]
+      : block_icons[n.type];
+  if (!image)
+    return;
   lv_obj_t *o = lv_image_create(p);
-  lv_image_set_src(o, block_icons[n.type]);
+  lv_image_set_src(o, image);
   lv_obj_set_pos(o, x, y);
   lv_obj_remove_flag(o, LV_OBJ_FLAG_CLICKABLE);
 }
@@ -209,17 +269,21 @@ static void quick_apply(void) {
     schedule_render();
   }
 }
-static lv_obj_t *numeric, *param_error, *choice_btn[5], *port_btn[4],
-    *matrix_grid, *matrix_cells[25];
+static lv_obj_t *numeric, *param_error, *choice_btn[7], *port_btn[4],
+    *matrix_grid, *matrix_cells[25], *beat_btn[4];
 static bool painting, paint_on;
 static int last_cell = -1;
 static void update_choices(void) {
-  for (int group = 0; group < 2; group++)
-    for (int i = 0; i < (group ? 5 : 4); i++) {
-      lv_obj_t *o = group ? choice_btn[i] : port_btn[i];
+  for (int group = 0; group < 3; group++)
+    for (int i = 0; i < (group == 1 ? 7 : 4); i++) {
+      lv_obj_t *o = group == 2 ? beat_btn[i]
+                    : group    ? choice_btn[i]
+                               : port_btn[i];
       if (!o)
         continue;
-      bool selected = (group ? draft.option : draft.port) == i;
+      bool selected = (group == 2 ? draft.value
+                       : group    ? draft.option
+                                  : draft.port) == i;
       lv_obj_set_style_bg_color(
           o, lv_color_hex(selected ? blocks[draft.type].color : 0xf4f7f9), 0);
       lv_obj_set_style_text_color(
@@ -227,11 +291,24 @@ static void update_choices(void) {
       lv_obj_set_style_border_width(o, selected ? 2 : 1, 0);
       lv_obj_set_style_border_color(
           o, lv_color_hex(selected ? 0xffffff : 0xdce3e9), 0);
+      if (group == 1 &&
+          (draft.type == MOTOR_POWER || draft.type == COMBO_POWER))
+        for (int bar = 0; bar < 4; bar++) {
+          lv_obj_t *segment = lv_obj_get_child(o, bar + 1);
+          lv_obj_set_style_bg_color(
+              segment,
+              lv_color_hex(
+                  bar <= i ? (selected ? 0xffffff : blocks[draft.type].color)
+                           : 0xdce3e9),
+              0);
+        }
     }
 }
 static void choose(lv_event_t *e) {
   int i = (int)(intptr_t)lv_event_get_user_data(e);
-  if (i >= 10)
+  if (i >= 20)
+    draft.value = i - 20;
+  else if (i >= 10)
     draft.port = i - 10;
   else
     draft.option = i;
@@ -435,6 +512,7 @@ static void parameters(int id) {
   fresh_number = true;
   memset(choice_btn, 0, sizeof choice_btn);
   memset(port_btn, 0, sizeof port_btn);
+  memset(beat_btn, 0, sizeof beat_btn);
   modal = box(lv_screen_active(), 0, 0, 800, 480, 0xeaf0f8);
   lv_obj_t *heading = label(modal, b->name);
   place_label(heading, 28, 18);
@@ -467,8 +545,14 @@ static void parameters(int id) {
   lv_area_t anchor;
   lv_obj_get_coords(bubbles[id] ? bubbles[id] : cards[id], &anchor);
   bool options = b->port || b->choices;
-  int width = b->choices == 5 ? 260 : 232;
-  int height = options && b->max ? 144 : 84;
+  int width = b->choices >= 4 ? 280 : 232;
+  int rows = (b->port ? 1 : 0) + (b->choices ? 1 : 0);
+  bool numeric_row = b->max && draft.type != NOTE;
+  if (numeric_row || draft.type == NOTE)
+    rows++;
+  int height = draft.type == NOTE              ? 228
+               : draft.type == COMBO_DIRECTION ? 128
+                                               : rows * 60 + 24;
   int cx = (anchor.x1 + anchor.x2) / 2, x = cx - width / 2, y = anchor.y2 + 14;
   if (x < 8)
     x = 8;
@@ -503,23 +587,57 @@ static void parameters(int id) {
   lv_obj_set_style_shadow_ofs_y(param_panel, 5, 0);
   if (b->port) {
     for (int i = 0; i < 4; i++) {
-      char text[2] = {(char)('A' + i), 0};
+      char text[2] = {(char)((b->category == 0 ? 'E' : 'A') + i), 0};
       port_btn[i] =
           button(param_panel, 19 + i * 50, 15, 44, 44, text, choose, 10 + i);
     }
-  } else if (b->choices) {
-    int w = b->choices == 5 ? 44 : 60, gap = b->choices == 5 ? 5 : 8;
+  }
+  if (draft.type == NOTE) {
+    lv_obj_t *caption = label(param_panel, "音符");
+    place_label(caption, 10, 7);
+    caption = label(param_panel, "拍数");
+    place_label(caption, 10, 139);
+  }
+  if (b->choices) {
+    int w = b->choices >= 4 ? 54 : 60, gap = b->choices >= 4 ? 2 : 8;
     int left = (width - (b->choices * w + (b->choices - 1) * gap)) / 2;
     for (int i = 0; i < b->choices; i++) {
-      choice_btn[i] = button(param_panel, left + i * (w + gap), 15, w, 44,
-                             option_text(draft.type, i), choose, i);
+      int option_x =
+          draft.type == NOTE ? 8 + (i % 4) * 67 : left + i * (w + gap);
+      int option_y = draft.type == NOTE ? 36 + (i / 4) * 52 : b->port ? 75 : 15;
+      if (draft.type == COMBO_DIRECTION) {
+        option_x = 12 + (i % 2) * 132;
+        option_y = 16 + (i / 2) * 52;
+        w = 124;
+      }
+      choice_btn[i] =
+          button(param_panel, option_x, option_y, draft.type == NOTE ? 64 : w,
+                 44, option_text(draft.type, i), choose, i);
+      if (draft.type == MOTOR_POWER || draft.type == COMBO_POWER) {
+        lv_obj_set_height(choice_btn[i], 54);
+        lv_obj_t *caption = lv_obj_get_child(choice_btn[i], 0);
+        lv_obj_set_style_text_font(caption, &lv_font_montserrat_14, 0);
+        lv_obj_align(caption, LV_ALIGN_BOTTOM_MID, 0, -3);
+        for (int bar = 0; bar < 4; bar++) {
+          lv_obj_t *segment =
+              decoration(choice_btn[i], 8 + bar * 10, 28 - (9 + bar * 4), 6,
+                         9 + bar * 4, b->color);
+          lv_obj_set_style_radius(segment, 1, 0);
+        }
+      }
     }
   }
-  if (b->max) {
-    int row = options ? 84 : 16;
+  if (draft.type == NOTE) {
+    const char *beats[] = {"0.25拍", "0.5拍", "1拍", "2拍"};
+    for (int i = 0; i < 4; i++)
+      beat_btn[i] = button(param_panel, 8 + i * 67, 168, 64, 44, beats[i],
+                           choose, 20 + i);
+  }
+  if (numeric_row) {
+    int row = (rows - 1) * 60 + 16;
     if (options) {
       lv_obj_t *divider =
-          decoration(param_panel, 14, 71, width - 28, 1, 0xffffff);
+          decoration(param_panel, 14, row - 13, width - 28, 1, 0xffffff);
       lv_obj_set_style_bg_opa(divider, LV_OPA_30, 0);
     }
     lv_obj_t *minus =
@@ -715,16 +833,16 @@ static void draw_node(lv_obj_t *p, int id, int x, int y) {
     return;
   char text[32];
   param_text(text, sizeof text, n);
-  lv_obj_t *b = button(o, bx + 2, by + 64, bw - 4, 44, text, param_click, id);
+  lv_obj_t *b = button(o, bx + 2, by + 64, bw - 4, 30, text, param_click, id);
   bubbles[id] = b;
-  lv_obj_set_style_radius(b, 24, 0);
-  lv_obj_set_style_text_font(b, &board_font, 0);
+  lv_obj_set_style_radius(b, 16, 0);
+  lv_obj_set_style_text_font(b, &board_param_font, 0);
   lv_point_t text_size;
-  lv_text_get_size(&text_size, text, &board_font, 0, 0, 1000,
+  lv_text_get_size(&text_size, text, &board_param_font, 0, 0, 1000,
                    LV_TEXT_FLAG_NONE);
-  int bubble_width = text_size.x + 12;
-  if (bubble_width < bw - 8)
-    bubble_width = bw - 8;
+  int bubble_width = text_size.x + 10;
+  if (bubble_width < 46)
+    bubble_width = 46;
   lv_obj_set_width(b, bubble_width);
   lv_obj_set_x(b, bx + (bw - bubble_width) / 2);
   lv_obj_set_style_border_width(b, 1, 0);
@@ -795,7 +913,7 @@ static bool project_at(int parent, int pos) {
   memcpy(old_cards, cards, sizeof cards);
   memcpy(old_cavities, cavities, sizeof cavities);
   memcpy(old_bubbles, bubbles, sizeof bubbles);
-  projection_layer = box(canvas, 0, 0, 800, 264, 0xeeeeee);
+  projection_layer = box(canvas, 0, 0, 800, 290, 0xeeeeee);
   content = projection_layer;
   memcpy(nodes, candidate, sizeof candidate);
   projection_drawing = true;
@@ -925,6 +1043,39 @@ static void drag_cleanup(void) {
       lv_obj_set_style_border_width(cavities[i], 0, 0);
   lv_obj_set_scroll_dir(canvas, LV_DIR_ALL);
 }
+static void drag_scroll_canvas(lv_point_t p) {
+  lv_area_t area;
+  lv_obj_get_coords(canvas, &area);
+  if (p.y > area.y1 + 24 && p.y < area.y2 - 24)
+    drag_entered_canvas = true;
+  int edge = 0;
+  if (p.x < area.x1 + 24)
+    edge |= 1;
+  if (p.x > area.x2 - 24)
+    edge |= 2;
+  if (drag_entered_canvas && p.y < area.y1 + 24)
+    edge |= 4;
+  if (drag_entered_canvas && p.y > area.y2 - 24)
+    edge |= 8;
+  if (!edge || edge != drag_edge) {
+    drag_edge = edge;
+    drag_edge_since = lv_tick_get();
+    return;
+  }
+  if (lv_tick_elaps(drag_edge_since) < 350)
+    return;
+  /* Use the real scene extent, not a temporary drop projection or ghost.
+   * scroll_by permits overscroll even when the scene fits the viewport. */
+  int max_x = LV_MAX(0, lv_obj_get_width(content) - lv_obj_get_width(canvas));
+  int max_y = LV_MAX(0, lv_obj_get_height(content) - lv_obj_get_height(canvas));
+  int x = lv_obj_get_scroll_x(canvas) + ((edge & 2)   ? 10
+                                         : (edge & 1) ? -10
+                                                      : 0);
+  int y = lv_obj_get_scroll_y(canvas) + ((edge & 8) ? 8 : (edge & 4) ? -8 : 0);
+  x = LV_CLAMP(0, x, max_x);
+  y = LV_CLAMP(0, y, max_y);
+  lv_obj_scroll_to(canvas, x, y, LV_ANIM_OFF);
+}
 static void drag_event(lv_event_t *e) {
   lv_event_code_t code = lv_event_get_code(e);
   int data = (int)(intptr_t)lv_event_get_user_data(e);
@@ -936,6 +1087,9 @@ static void drag_event(lv_event_t *e) {
   if (code == LV_EVENT_PRESSED) {
     pressed = p;
     source = data >= 0 ? data : -1;
+    drag_entered_canvas = source >= 0;
+    drag_edge = 0;
+    drag_edge_since = lv_tick_get();
     drag_group = data <= -100 ? -data - 100 : -1;
     kind = data >= 0 ? nodes[data].type : -data;
     dragging = false;
@@ -948,7 +1102,7 @@ static void drag_event(lv_event_t *e) {
     return;
   }
   if (code == LV_EVENT_PRESSING) {
-    if (drag_group >= 0 && !dragging) {
+    if (data < 0 && !dragging) {
       int dx = p.x - pressed.x, dy = p.y - pressed.y;
       if (staged_panning || (abs(dx) > 6 && abs(dx) >= abs(dy))) {
         staged_panning = true;
@@ -999,9 +1153,17 @@ static void drag_event(lv_event_t *e) {
         if (floating.type != FOREVER) {
           char text[32];
           param_text(text, sizeof text, floating);
-          lv_obj_t *tag = decoration(ghost, tail + 2, anchor + 28,
-                                     is_loop(kind) ? 56 : 72, 44, 0xffffff);
-          lv_obj_set_style_radius(tag, 24, 0);
+          lv_point_t extent;
+          lv_text_get_size(&extent, text, &board_param_font, 0, 0, 1000,
+                           LV_TEXT_FLAG_NONE);
+          int width = extent.x + 10;
+          if (width < 46)
+            width = 46;
+          int body = is_loop(kind) ? 60 : 76;
+          lv_obj_t *tag = decoration(ghost, tail + (body - width) / 2,
+                                     anchor + 28, width, 30, 0xffffff);
+          lv_obj_set_style_text_font(tag, &board_param_font, 0);
+          lv_obj_set_style_radius(tag, 16, 0);
           label(tag, text);
         }
       } else
@@ -1009,7 +1171,7 @@ static void drag_event(lv_event_t *e) {
     }
     if (dragging) {
       lv_obj_set_pos(ghost, p.x - 40, p.y - 30);
-      if (p.y >= 54 && p.y < 318) {
+      if (p.y >= 54 && p.y < 344) {
         restore_staging_category();
         if (drop_zone) {
           lv_obj_delete(drop_zone);
@@ -1017,21 +1179,15 @@ static void drag_event(lv_event_t *e) {
         }
         hover_since = 0;
         stage_hot = false;
+        drag_scroll_canvas(p);
         show_marker(p);
-        if (p.x > 770)
-          lv_obj_scroll_by(canvas, -10, 0, LV_ANIM_OFF);
-        if (p.x < 24)
-          lv_obj_scroll_by(canvas, 10, 0, LV_ANIM_OFF);
-        if (p.y < 76)
-          lv_obj_scroll_by(canvas, 0, 8, LV_ANIM_OFF);
-        if (p.y > 294)
-          lv_obj_scroll_by(canvas, 0, -8, LV_ANIM_OFF);
         say(projection_valid ? "松手放入半透明占位处" : "此处无法放入");
-      } else if (p.y >= 318 && p.y < 454) {
+      } else if (p.y >= 344 && p.y < 480) {
+        drag_edge = 0;
         projection_clear();
         projection_valid = false;
         if (!drop_zone && (source >= 0 || drag_group >= 0)) {
-          drop_zone = decoration(lv_layer_top(), 0, 318, 800, 136, 0xf3bac1);
+          drop_zone = decoration(lv_layer_top(), 0, 344, 800, 136, 0xf3bac1);
           lv_obj_set_style_text_font(drop_zone, &board_font, 0);
           label(drop_zone, "松手删除");
         }
@@ -1066,6 +1222,7 @@ static void drag_event(lv_event_t *e) {
         } else if (drag_group >= 0)
           say("拖回工作区，或在下方松手删除组");
       } else {
+        drag_edge = 0;
         restore_staging_category();
         hover_since = 0;
         stage_hot = false;
@@ -1077,7 +1234,7 @@ static void drag_event(lv_event_t *e) {
   }
   if (code != LV_EVENT_RELEASED && code != LV_EVENT_PRESS_LOST)
     return;
-  if (dragging && code == LV_EVENT_RELEASED && p.y >= 54 && p.y < 318)
+  if (dragging && code == LV_EVENT_RELEASED && p.y >= 54 && p.y < 344)
     show_marker(p);
   drag_cleanup();
   if (code == LV_EVENT_PRESS_LOST) {
@@ -1085,6 +1242,8 @@ static void drag_event(lv_event_t *e) {
     return;
   }
   if (!dragging) {
+    if (staged_panning)
+      return;
     if (drag_group >= 0) {
       say("向上拖回工作区；左右滑动浏览暂存");
     } else if (source >= 0) {
@@ -1095,12 +1254,12 @@ static void drag_event(lv_event_t *e) {
         schedule_render();
         say("已添加积木");
       } else
-        say("作品最多 32 张积木");
+        say("作品最多 100 张积木");
     }
     return;
   }
   dragging = false;
-  if (p.y >= 318 && p.y < 454 && (source >= 0 || drag_group >= 0)) {
+  if (p.y >= 344 && p.y < 480 && (source >= 0 || drag_group >= 0)) {
     if (source >= 0 && stage_hot) {
       stage_selection(NULL);
       return;
@@ -1114,7 +1273,7 @@ static void drag_event(lv_event_t *e) {
     }
     return;
   }
-  if (p.y < 54 || p.y >= 318) {
+  if (p.y < 54 || p.y >= 344) {
     say("已取消拖动");
     return;
   }
@@ -1128,7 +1287,7 @@ static void drag_event(lv_event_t *e) {
     schedule_render();
     say(drop_parent < 0 ? "已放入工作区" : "已放入循环");
   } else
-    say("无法放入：最多 32 张、8 层，不能包含自身");
+    say("无法放入：最多 100 张、8 层，不能包含自身");
 }
 static void draggable(lv_obj_t *o, int data) {
   lv_obj_add_flag(o, LV_OBJ_FLAG_CLICKABLE);
@@ -1166,7 +1325,18 @@ static void update_box_selection(lv_point_t p) {
     }
   update_selection_outline();
 }
+#ifdef CONFIG_BOARD_SCROLL_LEGACY
+#include "scroll_cache_legacy.inc"
+static void scroll_cache_scene_changed(void) {}
+void editor_cache_stats(EditorCacheStats *s) { memset(s, 0, sizeof(*s)); }
+#else
+#include "scroll_cache.inc"
+#endif
 static void canvas_event(lv_event_t *e) {
+  if (!(benchmark_panning && lv_event_get_code(e) == LV_EVENT_SCROLL_END))
+    scroll_cache_event(lv_event_get_code(e));
+  if (lv_event_get_code(e) == LV_EVENT_SCROLL)
+    perf_probe_scroll();
   lv_event_code_t code = lv_event_get_code(e);
   lv_indev_t *in = lv_indev_active();
   if (!in)
@@ -1216,6 +1386,7 @@ static void canvas_event(lv_event_t *e) {
 }
 static void category_change(lv_event_t *e) {
   category = (int)(intptr_t)lv_event_get_user_data(e);
+  lv_obj_scroll_to_x(palette, 0, LV_ANIM_OFF);
   render_palette();
 }
 static void render_palette(void) {
@@ -1259,11 +1430,37 @@ static void render_palette(void) {
     return;
   }
   int x = 16;
-  for (int t = 1; t <= TYPES; t++)
+  const int order[] = {MOTOR_POWER,
+                       MOTOR,
+                       REVERSE,
+                       MOTOR_CONTINUOUS,
+                       REVERSE_CONTINUOUS,
+                       MOTOR_STOP,
+                       COMBO_DIRECTION,
+                       COMBO_POWER,
+                       FORWARD,
+                       BACKWARD,
+                       LEFT,
+                       RIGHT,
+                       COMBO_CONTINUOUS,
+                       COMBO_STOP,
+                       ULTRASONIC,
+                       GRAYSCALE,
+                       BUTTON_SENSOR,
+                       HOST_BUTTON,
+                       WAIT,
+                       LOOP,
+                       FOREVER,
+                       NOTE,
+                       MATRIX};
+  for (int entry = 0; entry < TYPES; entry++) {
+    int t = order[entry];
     if (blocks[t].category == category) {
       Node n = node_default(t);
       bool loop = is_loop(t);
-      int w = loop ? 150 : 118;
+      /* Artwork widths are 95/64px: 146/114px pitches reduce the
+       * visible gaps from 73/72px to 51/50px (about 30%). */
+      int w = loop ? 146 : 114;
       lv_obj_t *b = box(palette, x, 2, w, 86, blocks[t].color);
       lv_obj_set_style_bg_opa(b, LV_OPA_TRANSP, 0);
       draggable(b, -t);
@@ -1282,6 +1479,8 @@ static void render_palette(void) {
         lv_obj_t *symbol = lv_obj_get_child(b, -1);
         lv_image_set_pivot(symbol, 0, 0);
         lv_image_set_scale(symbol, scale);
+        lv_obj_set_pos(symbol, left + (93 - BLOCK_ICON_INSET) * scale / 256,
+                       4 + (29 - BLOCK_ICON_INSET) * scale / 256);
       } else {
         /* Palette artwork is 75% size; the full-size drag target is unchanged.
          */
@@ -1304,10 +1503,19 @@ static void render_palette(void) {
       lv_obj_t *tag = box(b, 0, 66, w, 20, 0xeaf0f8);
       lv_obj_remove_flag(tag, LV_OBJ_FLAG_CLICKABLE);
       label(tag, loop ? (t == LOOP ? "次数" : "持续") : blocks[t].name);
-      x += w + 18;
+      x += w;
     }
+  }
 }
 static void render(void) {
+  if (!projection_drawing)
+    scroll_cache_invalidate();
+  if (!projection_drawing) {
+    unsigned total = 0;
+    for (int i = 0; i < LIMIT; i++)
+      total += nodes[i].type != 0;
+    perf_probe_scene(total);
+  }
   if (!projection_drawing) {
     selection_outline = NULL;
     selection_background = NULL;
@@ -1322,7 +1530,7 @@ static void render(void) {
       decoration(content, 24, y + seq.anchor - 36, 68 + 8, 72, 0xf5c402);
   lv_obj_set_style_bg_opa(start, LV_OPA_TRANSP, 0);
   block_shape(start, 68, 36, false, true, 0xf5c402);
-  label(start, LV_SYMBOL_PLAY);
+  icon(start, (Node){0}, 14, 16);
   int x = 92;
   for (int j = 0; j < count(-1); j++) {
     int id = nth(-1, j);
@@ -1330,7 +1538,7 @@ static void render(void) {
     x += sizes[id].width;
   }
   lv_obj_set_size(content, x + 100 > 800 ? x + 100 : 800,
-                  seq.height + y + 60 > 264 ? seq.height + y + 60 : 264);
+                  seq.height + y + 60 > 290 ? seq.height + y + 60 : 290);
   lv_obj_update_layout(content);
   lv_area_t occupied[LIMIT];
   int used = 0, extra_height = lv_obj_get_height(content),
@@ -1370,6 +1578,8 @@ static void render(void) {
   }
   if (!projection_drawing)
     update_selection_outline();
+  if (!projection_drawing)
+    scroll_cache_scene_changed();
   if (undo_btn) {
     if (history_pos == 0)
       lv_obj_add_state(undo_btn, LV_STATE_DISABLED);
@@ -1414,7 +1624,11 @@ static lv_obj_t *toolbar_button(lv_obj_t *bar, int x,
   lv_obj_remove_flag(icon, LV_OBJ_FLAG_CLICKABLE);
   return b;
 }
+#include "execution.inc"
 static void open_editor(void) {
+  home_thumbnail_dispose();
+  scroll_cache_dispose();
+  execution_dispose();
   modal = NULL;
   ghost = NULL;
   marker = NULL;
@@ -1429,22 +1643,32 @@ static void open_editor(void) {
   lv_obj_t *bar = box(screen, 0, 0, 800, 54, 0xffffff);
   lv_obj_t *title = label(bar, library.items[active_project].name);
   place_label(title, 72, 16);
-  lv_obj_set_width(title, 480);
+  lv_obj_set_width(title, 220);
+  device_status_dot = decoration(bar, 310, 23, 8, 8, 0x687480);
+  lv_obj_set_style_radius(device_status_dot, LV_RADIUS_CIRCLE, 0);
+  device_status_label = label(bar, "");
+  lv_obj_set_style_text_font(device_status_label, &board_param_font, 0);
+  place_label(device_status_label, 325, 17);
+  lv_obj_set_width(device_status_label, 140);
+  lv_obj_remove_flag(device_status_label, LV_OBJ_FLAG_CLICKABLE);
   lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
   toolbar_button(bar, 8, &toolbar_home, back_home, 0);
+  lv_obj_t *bt_button = button(bar, 474, 5, 88, 44, "", open_bluetooth, 0);
+  bt_status_label = lv_obj_get_child(bt_button, 0);
   undo_btn = toolbar_button(bar, 576, &toolbar_undo, history_step, -1);
   redo_btn = toolbar_button(bar, 632, &toolbar_redo, history_step, 1);
   toolbar_button(bar, 688, &toolbar_save, save_work, 0);
   toolbar_button(bar, 744, &toolbar_clear, clear, 0);
-  canvas = box(screen, 0, 54, 800, 264, 0xeeeeee);
+  canvas = box(screen, 0, 54, 800, 290, 0xeeeeee);
   lv_obj_add_flag(canvas, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(canvas, LV_DIR_ALL);
   lv_obj_set_scrollbar_mode(canvas, LV_SCROLLBAR_MODE_OFF);
   lv_obj_add_event_cb(canvas, canvas_event, LV_EVENT_ALL, NULL);
-  content = box(canvas, 0, 0, 800, 264, 0xeeeeee);
+  content = box(canvas, 0, 0, 800, 290, 0xeeeeee);
+  lv_obj_set_style_radius(content, 0, 0);
   lv_obj_remove_flag(content, LV_OBJ_FLAG_CLICKABLE);
-  tabs = box(screen, 0, 318, 800, 46, 0xeaf0f8);
-  palette = box(screen, 0, 364, 800, 90, 0xeaf0f8);
+  tabs = box(screen, 0, 344, 800, 46, 0xeaf0f8);
+  palette = box(screen, 0, 390, 800, 90, 0xeaf0f8);
   lv_obj_add_flag(palette, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_scroll_dir(palette, LV_DIR_HOR);
   lv_obj_set_scrollbar_mode(palette, LV_SCROLLBAR_MODE_OFF);
@@ -1455,5 +1679,10 @@ static void open_editor(void) {
   lv_label_set_long_mode(status, LV_LABEL_LONG_DOT);
   render();
   render_palette();
+  execution_create(screen);
+  scroll_cache_init();
 }
+#include "bluetooth.inc"
 #include "home.inc"
+#include "scroll_benchmark.inc"
+#include "thumbnail_render.inc"

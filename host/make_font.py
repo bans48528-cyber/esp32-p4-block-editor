@@ -1,13 +1,17 @@
 """Generate the local prototype glyph subset from an installed font (Pillow)."""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
-import re
+import re, sys
+small = "--small" in sys.argv
+font_name = "board_param_font" if small else "board_font"
 root=Path(__file__).resolve().parents[1]
-source=''.join((root/f'main/{name}.c').read_text(encoding='utf-8') for name in ['editor','model'])
+source=''.join((root/f'main/{name}.c').read_text(encoding='utf-8') for name in ['editor','model','device_status'])
 source+=(root/'main/home.inc').read_text(encoding='utf-8')
+source+=(root/'main/bluetooth.inc').read_text(encoding='utf-8')
+source+=(root/'main/execution.inc').read_text(encoding='utf-8')
 chars=set(''.join(re.findall(r'"([^"\n]*)"', source))) | set(chr(i) for i in range(32,127))
 chars=sorted(c for c in chars if ord(c)>=32)
-font=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',18)
+font=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',14 if small else 18)
 bitmap=[]; desc=['{0}']
 for char in chars:
     left,top,right,bottom=font.getbbox(char,anchor='ls');w=right-left;h=bottom-top
@@ -23,5 +27,7 @@ code+='static const uint16_t unicode[]={'+','.join(str(ord(c)-32) for c in chars
 code+='static const lv_font_fmt_txt_cmap_t maps[]={{.range_start=32,.range_length='+str(ord(chars[-1])-31)+',.glyph_id_start=1,.unicode_list=unicode,.list_length='+str(len(chars))+',.type=LV_FONT_FMT_TXT_CMAP_SPARSE_TINY}};\n'
 code+='static const lv_font_fmt_txt_dsc_t dsc={.glyph_bitmap=bitmap,.glyph_dsc=glyphs,.cmaps=maps,.cmap_num=1,.bpp=4};\n'
 code+='const lv_font_t board_font={.get_glyph_dsc=lv_font_get_glyph_dsc_fmt_txt,.get_glyph_bitmap=lv_font_get_bitmap_fmt_txt,.line_height=24,.base_line=5,.dsc=&dsc,.fallback=&lv_font_montserrat_14};\n'
-(root/'main/board_font.c').write_text(code,encoding='utf-8')
+if small:
+    code=code.replace('board_font=', 'board_param_font=').replace('.line_height=24,.base_line=5', '.line_height=20,.base_line=4')
+(root/f'main/{font_name}.c').write_text(code,encoding='utf-8')
 print(f'Generated {len(chars)} glyphs, {len(bitmap)} bitmap bytes')

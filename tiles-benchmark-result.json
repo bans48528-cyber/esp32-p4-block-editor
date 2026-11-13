@@ -1,0 +1,36 @@
+[
+  {
+    "file": "device-tiles-benchmark-before.log",
+    "windows": 22,
+    "frames": 352.0,
+    "fps": 15.52,
+    "minimum_window_fps": 15.24,
+    "avg": 55.59,
+    "work": 36.55,
+    "flush": 18.91,
+    "ppa": 17.3,
+    "lcd": 1.03,
+    "wait": 0.13,
+    "pixels": 233888.91,
+    "batches": 9.2,
+    "max_ms": 61.32,
+    "cached_ratio": 1.0
+  },
+  {
+    "file": "device-tiles-benchmark-after.log",
+    "windows": 22,
+    "frames": 364.0,
+    "fps": 15.97,
+    "minimum_window_fps": 15.55,
+    "avg": 53.55,
+    "work": 34.05,
+    "flush": 19.33,
+    "ppa": 17.72,
+    "lcd": 1.05,
+    "wait": 0.16,
+    "pixels": 233863.98,
+    "batches": 9.2,
+    "max_ms": 58.8,
+    "cached_ratio": 1.0
+  }
+]

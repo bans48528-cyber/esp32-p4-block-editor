@@ -12,13 +12,19 @@ const BlockDef blocks[TYPES + 1] = {
     {"组合左转", 1, 0xff4ccd, 1, 9999, 10, true, false, 0},
     {"组合右转", 1, 0xff4ccd, 1, 9999, 10, true, false, 0},
     {"组合停止", 1, 0xff4ccd, 0, 0, 0, false, false, 0},
-    {"超声波", 2, 0x34ccf1, 0, 100, 10, false, false, 3},
-    {"灰度传感器", 2, 0x34ccf1, 0, 1000, 500, false, false, 3},
-    {"按键传感器", 2, 0x34ccf1, 0, 0, 0, false, false, 2},
+    {"超声波", 2, 0x34ccf1, 0, 100, 10, false, true, 3},
+    {"灰度传感器", 2, 0x34ccf1, 0, 1000, 500, false, true, 3},
+    {"按键传感器", 2, 0x34ccf1, 0, 0, 0, false, true, 2},
     {"主机按键", 2, 0x34ccf1, 0, 0, 0, false, false, 2},
     {"持续循环", 3, 0xffb515, 0, 0, 0, false, false, 0},
-    {"演奏音", 4, 0xc061f1, 0, 0, 0, false, false, 5},
-    {"点阵", 4, 0x9b6af6, 0, 0, 0, false, false, 0}};
+    {"演奏音", 4, 0xc061f1, 0, 3, 0, false, false, 7},
+    {"点阵", 4, 0x9b6af6, 0, 0, 0, false, false, 0},
+    {"电机功率", 0, 0x0090f5, 0, 0, 0, false, false, 4},
+    {"持续正转", 0, 0x0090f5, 0, 0, 0, false, true, 0},
+    {"持续反转", 0, 0x0090f5, 0, 0, 0, false, true, 0},
+    {"组合电机功率", 1, 0xff4ccd, 0, 0, 0, false, false, 4},
+    {"组合持续移动", 1, 0xff4ccd, 0, 0, 0, false, false, 4},
+    {"组合电机方向", 1, 0xff4ccd, 0, 0, 0, false, false, 4}};
 bool is_loop(int type) { return type == LOOP || type == FOREVER; }
 Node node_default(int type) {
   Node n = {0};
@@ -26,6 +32,7 @@ Node node_default(int type) {
     return n;
   n.type = type;
   n.parent = -1;
+  n.option = (type == MOTOR_POWER || type == COMBO_POWER) ? 1 : 0;
   n.value = blocks[type].initial;
   n.matrix = type == MATRIX ? 1u << 12 : 0;
   return n;

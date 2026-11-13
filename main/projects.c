@@ -13,10 +13,10 @@
 void projects_empty(Library *l) {
   memset(l, 0, sizeof(*l));
   l->magic = MAGIC;
-  l->version = 2;
+  l->version = 3;
 }
 bool projects_valid(const Library *l) {
-  if (l->magic != MAGIC || l->version != 2)
+  if (l->magic != MAGIC || l->version != 3)
     return false;
   for (int i = 0; i < PROJECTS; i++) {
     const Project *p = &l->items[i];
@@ -48,6 +48,22 @@ bool projects_decode(Library *l, const void *data, size_t size) {
       return false;
     *l = *v;
     return true;
+  }
+  typedef struct {uint32_t used; char name[64]; Node nodes[32];} V2Project;
+  typedef struct {uint32_t magic, version; V2Project items[PROJECTS];} V2Library;
+  if (size == sizeof(V2Library)) {
+    const V2Library *v = data;
+    if (v->magic != MAGIC || v->version != 2) return false;
+    for (int p = 0; p < PROJECTS; p++) {
+      l->items[p].used = v->items[p].used;
+      memcpy(l->items[p].name, v->items[p].name, 64);
+      memcpy(l->items[p].nodes, v->items[p].nodes, sizeof v->items[p].nodes);
+      for (int i = 0; i < 32; i++)
+        if (v->items[p].nodes[i].type && v->items[p].nodes[i].parent >= 32)
+          goto invalid;
+    }
+    if (projects_valid(l)) return true;
+    goto invalid;
   }
   if (size != sizeof(OldLibrary))
     return false;
@@ -92,7 +108,7 @@ invalid:
   return false;
 }
 #ifdef ESP_PLATFORM
-int projects_load(Library *l) {
+static int load_legacy(Library *l) {
   projects_empty(l);
   if (nvs_flash_init() != ESP_OK)
     return -1;
@@ -128,13 +144,36 @@ int projects_load(Library *l) {
   free(data);
   return ok ? 1 : -1;
 }
+/* New partition leaves legacy NVS untouched during migration. */
+int projects_load(Library *l) {
+  projects_empty(l);
+  esp_err_t err = nvs_flash_init_partition("projects");
+  if (err == ESP_ERR_NOT_FOUND) return load_legacy(l);
+  if (err != ESP_OK) return -1;
+  nvs_handle_t h;
+  err = nvs_open_from_partition("projects", "card_projects", NVS_READONLY, &h);
+  if (err == ESP_ERR_NVS_NOT_FOUND) return load_legacy(l);
+  if (err != ESP_OK) return -1;
+  size_t size = 0;
+  err = nvs_get_blob(h, "library_v3", NULL, &size);
+  if (err == ESP_ERR_NVS_NOT_FOUND) {nvs_close(h);return load_legacy(l);}
+  if (err != ESP_OK || size != sizeof(Library)) {nvs_close(h);return -1;}
+  void *data = malloc(size);
+  if (!data) {nvs_close(h);return -1;}
+  err = nvs_get_blob(h, "library_v3", data, &size);
+  nvs_close(h);
+  bool ok = err == ESP_OK && projects_decode(l, data, size);
+  free(data);
+  return ok ? 1 : -1;
+}
 bool projects_save(const Library *l) {
   if (!projects_valid(l))
     return false;
   nvs_handle_t h;
-  if (nvs_open("card_projects", NVS_READWRITE, &h) != ESP_OK)
+  if (nvs_flash_init_partition("projects") != ESP_OK ||
+      nvs_open_from_partition("projects", "card_projects", NVS_READWRITE, &h) != ESP_OK)
     return false;
-  esp_err_t err = nvs_set_blob(h, "library_v2", l, sizeof(*l));
+  esp_err_t err = nvs_set_blob(h, "library_v3", l, sizeof(*l));
   if (err == ESP_OK)
     err = nvs_commit(h);
   nvs_close(h);
